@@ -18,7 +18,7 @@
 
     const fail = (msg) => { throw new Error(msg); };
 
-    // ---- Utility Functions ----
+
     function b62decode(input) {
         let bytesOut = [];
         let outPos = 0;
@@ -110,7 +110,7 @@
         }
     }
 
-    // ---- UI Component ----
+    
     async function initMod() {
         if (document.getElementById("pt-mod-root")) return;
 
@@ -250,7 +250,7 @@
             <div class="pt-content">
                 <div class="pt-field">
                     <label class="pt-label">Track Identifier</label>
-                    <input type="text" id="pt-track-id" class="pt-input" placeholder="polytrack24... or SHA256">
+                    <input type="text" id="pt-track-id" class="pt-input" placeholder="polytrack24...">
                 </div>
                 <div class="pt-field">
                     <label class="pt-label">Auth Token Hash</label>
@@ -267,13 +267,13 @@
                     <label class="pt-label">Duration (Frames)</label>
                     <input type="number" id="pt-frames" class="pt-input" value="100">
                 </div>
-                <button class="pt-btn" id="pt-inject-btn">Inject Payload</button>
+                <button class="pt-btn" id="pt-inject-btn">Inject Recording</button>
                 <div id="pt-status" class="pt-status"></div>
             </div>
         `;
         document.body.appendChild(root);
 
-        // State Management
+        
         const state = {
             minimized: false,
             userId: await fetchUserId()
@@ -293,7 +293,7 @@
 
         elements.userId.value = state.userId;
 
-        // Event Handlers
+        
         elements.minBtn.onclick = () => {
             state.minimized = !state.minimized;
             root.classList.toggle("minimized", state.minimized);
