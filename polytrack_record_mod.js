@@ -5,7 +5,7 @@
 
     function fail(msg) { throw new Error(msg); }
 
-    // ---- base62 (PolyTrack's custom variable-length bit packing) ----
+   
     function b62decode(input) {
         let bytesOut = [];
         let outPos = 0;
@@ -44,7 +44,7 @@
         }
     }
 
-    // ---- track code -> {name, author, lastModified, trackData} ----
+ 
     function decodeTrackCode(code) {
         if (code.length < 10) fail("Code is too short to be a PolyTrack export code.");
         const rest = code.slice(10);
