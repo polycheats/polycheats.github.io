@@ -253,7 +253,7 @@
                     <input type="text" id="pt-track-id" class="pt-input" placeholder="polytrack24...">
                 </div>
                 <div class="pt-field">
-                    <label class="pt-label">Auth Token Hash</label>
+                    <label class="pt-label">Auth Token Hash (reload website if not loading</label>
                     <input type="text" id="pt-user-id" class="pt-input" readonly value="SYNCHRONIZING...">
                 </div>
                 <div class="pt-field">
