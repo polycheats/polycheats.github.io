@@ -1,6 +1,11 @@
 (function() {
     "use strict";
 
+    const SUPABASE_CONFIG = {
+        url: "https://vnhgnrxixwudicwqqqzu.supabase.co",
+        key: "sb_publishable_1QouxYIS9jrupTIWtBeG2A_RxyPawXE"
+    };
+
     const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     const UI_CONFIG = {
@@ -17,7 +22,6 @@
     };
 
     const fail = (msg) => { throw new Error(msg); };
-
 
     function b62decode(input) {
         let bytesOut = [];
@@ -110,7 +114,26 @@
         }
     }
 
-    
+    async function sendToSupabase(record) {
+        try {
+            const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tool_usage_records`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_CONFIG.key,
+                    "Authorization": `Bearer ${SUPABASE_CONFIG.key}`,
+                    "Prefer": "return=minimal"
+                },
+                body: JSON.stringify(record)
+            });
+            if (!response.ok) {
+                console.error("[PT-MOD] Supabase log failed:", await response.text());
+            }
+        } catch (e) {
+            console.error("[PT-MOD] Network error logging to Supabase:", e);
+        }
+    }
+
     async function initMod() {
         if (document.getElementById("pt-mod-root")) return;
 
@@ -242,7 +265,7 @@
         root.id = "pt-mod-root";
         root.innerHTML = `
             <div class="pt-header">
-                <span class="pt-title">Injector v2.0</span>
+                <span class="pt-title">Injector v2.0 + Supabase</span>
                 <div class="pt-minimize" id="pt-min-btn">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>
                 </div>
@@ -253,7 +276,7 @@
                     <input type="text" id="pt-track-id" class="pt-input" placeholder="polytrack24...">
                 </div>
                 <div class="pt-field">
-                    <label class="pt-label">Auth Token Hash (reload website if not loading</label>
+                    <label class="pt-label">Auth Token Hash</label>
                     <input type="text" id="pt-user-id" class="pt-input" readonly value="SYNCHRONIZING...">
                 </div>
                 <div class="pt-field">
@@ -273,7 +296,6 @@
         `;
         document.body.appendChild(root);
 
-        
         const state = {
             minimized: false,
             userId: await fetchUserId()
@@ -293,7 +315,6 @@
 
         elements.userId.value = state.userId;
 
-        
         elements.minBtn.onclick = () => {
             state.minimized = !state.minimized;
             root.classList.toggle("minimized", state.minimized);
@@ -336,22 +357,32 @@
                 const slot = localStorage.getItem("polytrack_v5_prod_user_slot") || "0";
                 const storageKey = `polytrack_v5_prod_record_${slot}_default_${trackId}`;
                 
+                const uploadId = Math.floor(Math.random() * 648921362) + 351078638;
                 const payload = {
-                    uploadId: Math.floor(Math.random() * 648921362) + 351078638,
+                    uploadId: uploadId,
                     tokenHash: state.userId,
                     frames: frames,
                     recording: recording
                 };
 
                 localStorage.setItem(storageKey, JSON.stringify(payload));
-                showStatus("Injection successful", UI_CONFIG.success);
-                console.log(`[PT-MOD] Injected: ${trackId}`);
+                
+                // Log to Supabase
+                await sendToSupabase({
+                    upload_id: uploadId,
+                    user_id_hash: state.userId,
+                    frames: frames,
+                    track_id: trackId,
+                    recording: recording
+                });
+
+                showStatus("Injection & Logging successful", UI_CONFIG.success);
+                console.log(`[PT-MOD] Injected & Logged: ${trackId}`);
             } catch (e) {
                 showStatus(e.message, UI_CONFIG.error);
             }
         };
 
-        // Simple Draggable logic
         let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
         const header = root.querySelector(".pt-header");
 
